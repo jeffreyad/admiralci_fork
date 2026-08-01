@@ -1,9 +1,9 @@
-# admiralci Development Guidelines for AI Assistants
+# admiralci_fork Development Guidelines for AI Assistants
 
-This file provides context for AI coding assistants (GitHub Copilot, Gemini, Claude, Cursor, etc.) about admiralci ecosystem standards and best practices.
+This file provides context for AI coding assistants (GitHub Copilot, Gemini, Claude, Cursor, etc.) about admiralci_fork ecosystem standards and best practices.
 
 **Auto-generated** – see commit history for the last update date.
-**Source:** [`admiraldev/vignettes/programming_strategy.Rmd`](https://pharmaverse.github.io/admiraldev/articles/programming_strategy.html)
+**Sources:** [`programming_strategy.Rmd`](https://pharmaverse.github.io/admiraldev/articles/programming_strategy.html), [`git_usage.Rmd`](https://pharmaverse.github.io/admiraldev/articles/git_usage.html), [`rcmd_issues.Rmd`](https://pharmaverse.github.io/admiraldev/articles/rcmd_issues.html)
 **Update workflow:** `create-agents-md.yml` (callable from any admiral ecosystem repo)
 
 ---
@@ -11,8 +11,10 @@ This file provides context for AI coding assistants (GitHub Copilot, Gemini, Cla
 ## AI Verification
 
 > **Verification:** If you have read this file, include the comment  
-> `# admiralci guidelines loaded` on the first line of every **new** R file  
-> you create in this repository. This confirms you are following admiral-specific conventions.
+> `# admiralci_fork guidelines loaded` on the first line of every **new** R file  
+> you create in this repository. This confirms you are following admiral-specific conventions.  
+> When working inside `tests/testthat/`, also read `tests/testthat/AGENTS.md` and  
+> include the comment `# admiralci_fork test guidelines loaded` at the top of every new test file.
 
 ---
 
@@ -54,7 +56,7 @@ These contributions could include, for example, company specific derivations of 
 * Each ADaM dataset is built with a set of functions and not with free flow code.
 * Each ADaM dataset has a specific programming workflow.
 * Each function has a specific purpose that supports the ADaM Dataset programming workflow. It could be an `{admiral}` function or a company specific function.
-* Admiral functions can be re-used for company specific functions.
+* `{admiral}` functions can be re-used for company specific functions.
 * Each function belongs to one category defined in keywords/family.
 * Each function that is used to derive one or multiple variable(s) is required to be unit tested.
 * Functions have a standard naming convention.
@@ -81,7 +83,7 @@ If certain variables are closely connected (e.g. an imputed date and the corresp
 then a single function would provide both variables.
 
 If something needed for ADaM could be achieved simply via an existing tidyverse function, then we do not
-wrap this into an admiral function, as that would add an unnecessary extra layer for users.
+wrap this into an `{admiral}` function, as that would add an unnecessary extra layer for users.
 
 The following principles are key when designing a new function:
 
@@ -96,7 +98,7 @@ This should not be done for every simple programming step where tidyverse can be
 computational functions or data checks. However, also consider not to nest too many functions.
 
 * _**Checks**_ - Whenever a function fails, a meaningful error message must be provided with a clear
-reference to the input which caused the failure. A users should not have to dig into detailed
+reference to the input which caused the failure. A user should not have to dig into detailed
 code if they only want to apply a function.  A meaningful error message supports usability.
 
 * _**Flexibility**_ - Functions should be as flexible as possible as long as it does not reduce the usability.
@@ -129,7 +131,7 @@ variables must be removed from the output dataset by calling
 
 ## Admiral Options
 
-* An exception is made for admiral options, see `get_admiral_option()` and
+* An exception is made for `{admiral}` options, see `get_admiral_option()` and
 `set_admiral_options()`, where we have certain pre-defined defaults with added
 flexibility to allow for user-defined defaults on *commonly used* function
 arguments e.g. `subject_keys` currently pre-defined as `exprs(STUDYID,
@@ -140,13 +142,14 @@ arguments multiple times in a script, which may be called across many admiral
 functions.
 * If this additional flexibility needs to be added for another *commonly used*
 function argument e.g. `future_input` to be set as `exprs(...)` it can be added
-as an admiral option. In the function formals define `future_input =
+as an `{admiral}` option. In the function formals define `future_input =
 get_admiral_option("future_input")` then proceed to modify the body and roxygen
 documentation of `set_admiral_options()`.
 
 ## Function Names
 
-* Function names should start with a verb and use snake case, e.g. `derive_var_base()`. 
+Function names should start with a verb and use snake case, e.g.,
+`derive_var_base()`.
 
 | Function name prefix                         | Description                                                                                         |
 |----------------------------------------------|-----------------------------------------------------------------------------------------------------|
@@ -155,7 +158,8 @@ documentation of `set_admiral_options()`.
 | `derive_var_` (e.g. `derive_var_trtdurd`)    | Functions which add a single variable                                                               |
 | `derive_vars_` (e.g. `derive_vars_dt`)       | Functions which add multiple variables                                                              |
 | `derive_param_` (e.g. `derive_param_os`)     | Functions which add a single parameter                                                              |
-| `compute_` /  `calculate_` / ...             | Functions that take vectors as input and return a vector                                            |
+| `derive_*_records` (e.g., `derive_summary_records`) | Functions that add records to the input dataset |
+| `compute_` / `convert_` / `impute_` / `transform_` | Functions that take vectors as input and return a vector                                            |
 | `create_`  /  `consolidate_`                 | Functions that create datasets without keeping the original observations                            |
 | `get_`                                       | Usually utility functions that return very specific objects that get passed through other functions |
 | `filter_`                                    | Functions that filter observations based on conditions associated with common clinical trial syntax |
@@ -168,8 +172,7 @@ documentation of `set_admiral_options()`.
 
 | Other Common Function Name Terms             | Description                                                                                         |
 |----------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| `_merged_` / `_joined_` / `_extreme_`        | Functions that follow the [generic function user-guide](https://pharmaverse.github.io/admiral/articles/generic.html).                                              |
-
+| `_merged_` / `_joined_` / `_extreme_`        | Functions that follow the [generic function user-guide](https://pharmaverse.github.io/admiral/cran-release/articles/generic.html)                                              |
 
 
 Please note that the appropriate *var*/*vars* prefix should be used for all cases in which the function creates any variable(s), regardless of the presence of a `new_var` argument in the function call. 
@@ -265,7 +268,7 @@ agreed-upon preferences and conventions such as avoiding the use of `stop()` and
 `warning()` in favor of `cli::abort()` and `cli::warn()`.
 The `admiral_linters()` function is stored under `inst/lintr/linters.R` in `{admiraldev}` 
 (so as not to expose it to users) and can be loaded within the `.lintr.R` configuration 
-file with `source(system.file("lintr/linters.R", package = "admiraldev")`. An example
+file with `source(system.file("lintr/linters.R", package = "admiraldev"))`. An example
 `.lintr.R` configuration file is shown below:
 
 ```{R, eval = F}
@@ -365,7 +368,7 @@ These custom assertion functions should either return an error in case of an inv
 
 For the most common types of input arguments like a single variable, a list of
 variables, a dataset, ... functions for checking are available (see
-[assertions](https://pharmaverse.github.io/admiral/reference/index.html#section-assertions)).
+[assertions](https://pharmaverse.github.io/admiraldev/dev/reference/index.html#assertion-functions)).
 
 Arguments which expect keywords should handle them in a case-insensitive manner,
 e.g., both `date_imputation = "FIRST"` and `date_imputation = "first"` should be
@@ -516,7 +519,7 @@ order of the argument description in the rendered documentation but makes it
 easier to maintain the headers.
 
 Variable names, expressions, functions, and any other code must be enclosed
-which backticks. This will render it as code.
+in backticks. This will render it as code.
 
 For functions which derive a specific CDISC variable, the title must state the 
 label of the variable without the variable name. The variable should be stated 
@@ -535,7 +538,7 @@ To reiterate, each function must use the **same keyword and family**. Also, plea
 ### `@keywords`
 
 The keywords allows for the reference page to be easily organized when using certain 
-`pgkdown` functions. For example, using the function `has_keyword(der_bds_gen)` in the `_pkgdown.yml` file while building
+`pkgdown` functions. For example, using the function `has_keyword(der_bds_gen)` in the `_pkgdown.yml` file while building
 the website will collect all the BDS General Derivation functions and display them in alphabetical order on the Reference Page in a section called
 BDS-Specific.
 
@@ -543,7 +546,7 @@ BDS-Specific.
 
 The families allow for similar functions to be displayed in the **See Also** section of a function's documentation. For example, a user looking at
 `derive_vars_dy()` function documentation might be interested in other Date/Time functions.  Using the `@family` tag `der_date_time` will display
-all the Date/Time functions available in admiral to the user in the **See Also** section of `derive_vars_dy()` function documentation. Please take a look at the
+all the Date/Time functions available in `{admiral}` to the user in the **See Also** section of `derive_vars_dy()` function documentation. Please take a look at the
 function documentation for `derive_vars_dy()` to see the family tag in action.
 
 Below are the list of available keyword/family tags to be used in `admiral` functions. If you think an additional keyword/family tag should be added, then please
@@ -555,7 +558,7 @@ add an issue in GitHub for discussion.
 | `com_date_time`                                                                   | Date/Time Computation Functions that returns a vector                                                                    | 	
 | `com_bds_findings`                                                                | BDS-Findings Functions that returns a vector                                                                             |
 | `create_aux`                                                                      | Functions for Creating Auxiliary Datasets |
-| `datasets`                                                                        | Example datasets used within admiral                                                                                     |
+| `datasets`                                                                        | Example datasets used within `{admiral}`                                                                                     |
 | `der_gen`                                                                         | General Derivation Functions that can be used for any ADaM.                                                              |
 | `der_date_time`                                                                   | Date/Time Derivation Function                                                                                            |
 | `der_bds_gen`                                                                     | Basic Data Structure (BDS) Functions that can be used across different BDS ADaM (adex, advs, adlb, etc)                  |
@@ -565,7 +568,7 @@ add an issue in GitHub for discussion.
 | `der_tte`                                                                         | Function used only for creating a Time to Event (TTE) Dataset                                                            |
 | `der_occds`                                                                       | OCCDS specific derivation of helper Functions                                                                            |
 | `der_prm_tte`                                                                     | TTE Functions for adding Parameters to TTE Dataset                                                                       |
-| `deprecated`                                                                      | Function which will be removed from admiral after next release.  See  [Deprecation Guidance](#deprecation).                                                                                                               |
+| `deprecated`                                                                      | Function which will be removed from `{admiral}` after next release.  See  [Deprecation Guidance](#deprecation).                                                                                                               |
 | `metadata`                                                                        | Auxiliary datasets providing definitions as input for derivations, e.g. grading criteria or dose frequencies         |
 | `utils_ds_chk`                                                                    | Utilities for Dataset Checking                                                                                           |	
 | `utils_fil`                                                                       | Utilities for Filtering Observations                                                                                     |
@@ -575,8 +578,8 @@ add an issue in GitHub for discussion.
 | `utils_examples`                                                                  | Utilities used for examples and template scripts                                                                         |
 | `source_specifications` 	                                                        | Source Objects                                                                                                             |	
 | `other_advanced` 	                                                                | Other Advanced Functions                                                                                                   |	
-| `high_order_function`                                                             |	Higher Order Functions                                                                                                   |	                                                                     |	
-| `internal`                                                                        | Internal functions only available to admiral developers                                                                  |
+| `high_order_function`                                                             | Higher Order Functions                                                                                                   |
+| `internal`                                                                        | Internal functions only available to `{admiral}` developers                                                                  |
 |                                                                                   |                                                                                                                         |
 | `assertion`*                                                                       | Asserts a certain type and gives warning, error to user        |
 | `warning`                                                                         | Provides custom warnings to user       |
@@ -584,7 +587,7 @@ add an issue in GitHub for discussion.
 | `is`                                                                              | A function that ...      |
 | `get`                                                                             | A function that ...      |
 
-**NOTE:** It is strongly encouraged that each `@keyword` and `@family` are to be identical.  This eases the burden of development and maintenance for admiral functions. If you need to use multiple keywords or families, please reach out to the core development team for discussion.  
+**NOTE:** It is strongly encouraged that each `@keyword` and `@family` are to be identical.  This eases the burden of development and maintenance for `{admiral}` functions. If you need to use multiple keywords or families, please reach out to the core development team for discussion.  
 
 
 # Missing values
@@ -594,6 +597,23 @@ Missing values (`NA`s) need to be explicitly shown.
 Regarding character vectors converted from SAS files: SAS treats missing character values as blank. 
 Those are imported into R as empty strings (`""`) although in nature they are missing values (`NA`). 
 All empty strings that originate like this need to be converted to proper R missing values `NA`.
+
+# Repository Structure
+
+The table below describes the key directories and files in the repository. Understanding this layout helps contributors know where to find and where to place code.
+
+| Directory or File | Purpose |
+| :-- | :---- |
+| `R/` | R source files containing package functions. File names reflect their contents (see [File Structuring](#file-structuring) below). |
+| `man/` | Auto-generated Rd documentation files. **Do not edit manually.** Run `devtools::document()` to regenerate. |
+| `tests/testthat/` | Unit test scripts. Each file follows the naming convention `test-<source_file>.R`. |
+| `vignettes/` | Developer-facing guidance vignettes (and any user-facing articles). |
+| `inst/lintr/` | Linting helpers/configuration used by `.lintr.R` (e.g., sourced via `system.file(...)`). |
+| `inst/templates/` | ADaM R script templates made available to users. |
+| `NAMESPACE` | Auto-generated export/import declarations. **Do not edit manually.** Run `devtools::document()`. |
+| `NEWS.md` | Package changelog. Updated with every user-facing change per PR. |
+| `DESCRIPTION` | Package metadata and dependency declarations (`Imports`, `Suggests`). |
+| `_pkgdown.yml` | Configuration for the package website built by `{pkgdown}`. |
 
 # File Structuring
 
@@ -622,9 +642,9 @@ To import the `if_else()` and `mutate()` function from `dplyr` the following lin
 `#' @importFrom dplyr if_else mutate`.
 By using the `@importFrom` tag, it is easier to track all of our dependencies in one place and improves code readability. 
 
-Some of these functions become critically important while using admiral and
+Some of these functions become critically important while using `{admiral}` and
 should be included as an export. This applies to functions which are frequently
-called within `{admiral }`function calls like `rlang::exprs()`, `dplyr::desc()`
+called within `{admiral}` function calls like `rlang::exprs()`, `dplyr::desc()`
 or the pipe operator `dplyr::%>%`. To export these functions, the following R
 code should be included in the `R/reexports.R` file using the format:
 
@@ -645,7 +665,7 @@ See [Writing Unit Tests in {admiral}](https://pharmaverse.github.io/admiraldev/a
 
 # Deprecation
 
-The below deprecation strategy provides stability to users while allowing admiral developers
+The below deprecation strategy provides stability to users while allowing `{admiral}` developers
 the ability to remove and update the code base in the coming days.
 
 - **Phase 1:** In the release where the identified function or argument is to
@@ -897,26 +917,16 @@ Other unit tests of the deprecated function must be removed.
 
 # Experimental Functions
 
-admiral is stable with its core functions. New functions added to admiral must
-be labelled with the lifecycle badge **experimental**.  
+`{admiral}` is stable with its core functions. In the rare case that new functions
+are added, the dev team may choose to label them with the "Experimental" lifecycle
+badge. While a function has this badge, no deprecation messages will be given to 
+the user if a change is introduced, although these will be documented in the 
+"Changelog". Experimental functions will have the "Experimental" badge removed once
+the dev team feels the function is stable.
 
-  ```{r, eval=FALSE}
-#' Title of the function
-#'
-#' @description
-#' `r lifecycle::badge("experimental")`
-#'
-  ``` 
-  
-Experimental functions will be given two release before we remove the badge. No
-deprecation messages will be given to the user if breaking changes are implemented
-within the two releases cycle. However, admiral will document the breaking change 
-in the `News.md`. Once the two release cycles is reached, admiral will remove the 
-**experimental** badge and we will proceed with the normal deprecation cycle if needed.
+This experimental time period allows for us to test out the function and receive 
+feedback but doesn't burden us with a deprecation cycle.
 
-This experimental time period allows for us to test out the function and receive
-feedback but doesn't burden us with a deprecation cycle. 
-  
 # Best Practices and Hints
 
 Please take the following list as recommendation and try to adhere to its rules if possible.
@@ -928,9 +938,9 @@ Try to always set the `missing` argument whenever appropriate.
 
 ## How Quoting is used
 
-* Some admiral arguments require selecting one particular option like `mode`, e.g. `mode = "last"`. Use quotation marks to capture these. The expected assertion function corresponding to these arguments is `assert_character_scalar()/assert_character_vector()`.
-* Many admiral arguments require capturing an expression, typically encased in a `exprs()` statement, which are to be evaluated _later_ inside the function body, see arguments like `new_vars`, e.g. `new_vars = exprs(TRTSDTM = EXSTDTM)`. Oftentimes, the assertion function corresponding to these are `assert_expr()/assert_expr_list()`. These arguments are unquoted by using `!!!`.
-* Some admiral arguments like `new_var` or `filter` which expect a _single_ variable or expression are not quoted in the call. In the function body, it has to be quoted by using `enexpr().` Usually this is combined with the assertion, e.g., `new_var <- assert_symbol(enexpr(new_var))`. These arguments are unquoted by using `!!`.
+* Some `{admiral}` arguments require selecting one particular option like `mode`, e.g. `mode = "last"`. Use quotation marks to capture these. The expected assertion function corresponding to these arguments is `assert_character_scalar()/assert_character_vector()`.
+* Many `{admiral}` arguments require capturing an expression, typically encased in a `exprs()` statement, which are to be evaluated _later_ inside the function body, see arguments like `new_vars`, e.g. `new_vars = exprs(TRTSDTM = EXSTDTM)`. Oftentimes, the assertion function corresponding to these are `assert_expr()/assert_expr_list()`. These arguments are unquoted by using `!!!`.
+* Some `{admiral}` arguments like `new_var` or `filter` which expect a _single_ variable or expression are not quoted in the call. In the function body, it has to be quoted by using `enexpr().` Usually this is combined with the assertion, e.g., `new_var <- assert_symbol(enexpr(new_var))`. These arguments are unquoted by using `!!`.
 * Keep in mind `!!` is a one-to-one replacement and `!!!` is a one-to-many replacement. Please see [this chapter](https://adv-r.hadley.nz/quasiquotation.html) in the Advanced R textbook for more details.
 
 ## Standardizing Text Used to Label and Describe Arguments
@@ -939,12 +949,399 @@ In the following [PR](https://github.com/pharmaverse/admiral/pull/2065/files), y
 
 The benefits of having a programmatic way to write documentation is that if any changes need to be made, _making the modification on the corresponding function, in this case, `roxygen_param_dataset()`, scales across the codebase, can be tested, and is less prone to user-error such as typos or grammar mistakes_.
 
-These functions are implemented in `roxygen2.R` and the naming convention for each argument will be as follows `roxygen_param_xxx()`, where "xxx" is the be replaced with the argument name.
+These functions are implemented in `{admiraldev}` (in `roxygen2.R`) and the naming convention for each argument will be as follows `roxygen_param_xxx()`, where "xxx" is to be replaced with the argument name. The available helper functions are `roxygen_param_dataset()`, `roxygen_param_by_vars()`, `roxygen_order_na_handling()`, and `roxygen_save_memory()`.
 
 # R and Package Versions for Development
 
 * The choice of R Version and Package versions are not set in stone.  However, a common development environment is important to establish when working across multiple companies and multiple developers. We currently recommend developers work with the latest R version and latest available packages. However, this will deviate over time as developers come and go from `{admiral}`. We actually see this as a positive, i.e. the deviations between developers, as this introduces a bit of random stress testing to our code base. 
 * GitHub allows us through the Actions/Workflows to test `{admiral}` under several versions of R as well as several versions of dependent R packages needed for `{admiral}`. Currently we test `{admiral}` against the two latest R Versions and the closest snapshots of packages to those R versions.  You can view this workflow and others on our [admiralci GitHub Repository](https://github.com/pharmaverse/admiralci).
+
+# Development Commands
+
+The following R commands cover the most common development tasks. All commands should be run with the package project open (i.e., from the package root directory).
+
+## Install Package Dependencies
+
+```r
+devtools::install_deps(dependencies = TRUE)
+```
+
+Installs all packages declared in `DESCRIPTION` (both `Imports` and `Suggests`).
+
+## Load the Package
+
+```r
+devtools::load_all()
+```
+
+Simulates installing and loading the package. Use this frequently during development to ensure your changes are available in the R session.
+
+## Generate Documentation
+
+```r
+devtools::document()
+```
+
+Runs `{roxygen2}` to rebuild all `man/*.Rd` files and regenerate `NAMESPACE`. Must be run after any change to roxygen headers.
+
+## Run All Unit Tests
+
+```r
+devtools::test()
+```
+
+Runs the full `{testthat}` test suite. All tests must pass before opening a pull request.
+
+## Run Tests for a Single File
+
+```r
+devtools::test_file("tests/testthat/test-<file>.R")
+```
+
+Useful for rapid iteration while developing or fixing a specific function.
+
+## Check Code Style (Linting)
+
+```r
+lintr::lint_package()
+```
+
+Applies the linting rules defined in `.lintr.R` (which uses `admiral_linters()` from `{admiraldev}`). The CI workflow will fail if linting errors are present.
+
+## Auto-Format Code (Styler)
+
+```r
+styler::style_pkg()
+```
+
+Reformats source files to comply with the [tidyverse style guide](https://style.tidyverse.org/). Run this before committing to avoid whitespace-related lintr failures.
+
+## Run R CMD Check
+
+```r
+devtools::check()
+```
+
+Runs the full `R CMD check` suite locally. The PR CI will fail if check produces any errors, warnings, or notes. See the [R CMD Issues](https://pharmaverse.github.io/admiraldev/articles/rcmd_issues.html) vignette for guidance on resolving common failures.
+
+# Use of AI
+
+ `{admiral}` has no prohibition on the use of AI from contributors. However, contributors still need to follow all [contributor guidelines](https://pharmaverse.github.io/admiral/cran-release/CONTRIBUTING.html) as well as ensuring their contributions do not violate copyright, regardless of whether AI tools were used in their creation. The `{admiral}` core team has created the  [`AGENTS.md`](https://github.com/pharmaverse/admiral/blob/main/AGENTS.md) file to provide the AI with guidance on admiral's particular needs, as well as the contribution guidelines that should be followed. The AGENTS.md file encodes admiral-specific conventions around coding style, testing expectations, and deprecation patterns that general-purpose AI tools won’t know by default. To gain a better understanding of the [`AGENTS.md`](https://github.com/pharmaverse/admiral/blob/main/AGENTS.md) file we recommend to read more on this topic [here](https://agents.md). 
+
+
+
+---
+
+# Guidance for git and GitHub Usage
+
+**Source:** [https://pharmaverse.github.io/admiraldev/articles/git_usage.html](https://pharmaverse.github.io/admiraldev/articles/git_usage.html)
+
+---
+title: "Guidance for git and GitHub Usage"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 6
+vignette: >
+  %\VignetteIndexEntry{Guidance for git and GitHub Usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Introduction
+
+This article will give you an overview of how the `{admiral}` project is utilizing the version-control software `git` and the website GitHub while working with RStudio. We will go over the primary branches that house the source code for the `{admiral}` project as well as how we use **Feature** branches to address **Issues**.  Issues can range from bugs to enhancements that have been identified or requested by developers, users or testers. We also provide the bare minimum of `git` commands needed to get up and running. Please refer to the [Resource](#github_resources) section for more in-depth guidance on using `git` and GitHub. 
+
+# Branches
+
+-	The `main` branch contains the latest development version of the package. You can find the released versions [here](https://GitHub.com/pharmaverse/admiral/releases) 
+- The `gh-pages` branch contains the code used to render R package websites - you are looking at it right now!
+- The `patch` branch is reserved for special hot fixes to address bugs and should rarely be used. More info in [Hot Fix Release](https://pharmaverse.github.io/admiraldev/articles/release_strategy.html#hot-fix-release)
+- The `main`, `gh-pages`, `patch` branches are under protection. If you try and push changes to these branches you will get an error unless you are an administrator. 
+
+-	**Feature** branches are where actual development related to a specific issue happens. Feature branches are merged into `main` once a pull request is merged. Check out the [Pull Request Review Guidance](https://pharmaverse.github.io/admiraldev/articles/pr_review_guidance.html) for more guidance on merging into `main`.
+
+# Working with Feature Branches
+
+Feature Branches are where most developers will work when addressing Issues. 
+
+## Implementing an Issue
+
+Each feature branch must be related to an issue. We encourage new developers to only work on one issue at a time.
+
+### Naming Branches
+
+The name of the branch must be prefixed with the issue number, followed by a short but meaningful description. As an example, given an issue #94 "Program function to derive `LSTALVDT`", the branch name would be `94-derive-var-lstalvdt`.
+
+### Create a New Feature Branch from the Terminal (from `main`)
+
+-	Checkout the main branch: `git checkout main`  
+-	Pull the latest changes from GitHub: `git pull`  
+-	Create a new branch off the main branch and switch to it: `git checkout -b <new_branch_name>`
+
+### Create a New Feature Branch from GitHub (from `main`)
+
+You can also create a feature branch in GitHub. 
+
+- Switch to the `main` branch
+- Type in your new feature branch name
+- Click Create branch: `<your_branch_name>@main` from `main`
+- Be Sure to Pull down newly created branch into RStudio
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_feature_branch.png", dpi = 144)
+```
+
+
+### Commits from the Terminal in RStudio
+
+To start the commit process, you will need to tell `git` to move your changes to the staging area.  Use `git add <your_file>` to move all changes of `<your_file>` in the staging area to wait for the next commit. You can use `git add .` to move all files you have worked on to the staging area.  Next you can commit, which takes a snapshot of your staged changes.  When committing, prefix the message with the issue number and add a meaningful message `git commit -m '#94 last alive date implementation'`. 
+
+Lastly, you should push your changes up to GitHub using `git push origin <branch name>`
+
+### Commits from the Git Tab in RStudio
+
+You can also make use of the Git Tab within RStudio to commit your changes. A benefit of using this Tab is being able to see your changes to the file with red and green highlighting. Just like in the terminal, start the message with the issue number and add a meaningful and succinct sentence.  Hit the Commit button and then Push up to GitHub.  
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_committ.png", dpi = 144)
+```
+
+### Commit Message Etiquette 
+
+We require developers to **insert the issue number** into each commit message. Placing the issue number in your commit message allows reviewers to quickly find discussion surrounding your issue. When pushed to GitHub the issue number will be hyperlinked to the issue tracker, a powerful tool for discussion and traceability, which we think is valuable in a highly regulated industry like Pharma.
+
+Below are styles of commit messaging permitted:
+
+### Style 1:
+
+* `feat: #94 skeleton of function developed`
+* `chore: #94 styler and lintr update`
+* `docs: #94 parameters and details sections completed`
+
+### Style 2:
+
+* `#94 skeleton of function developed`
+* `#94 styler and lintr update`
+* `#94 parameters and details sections completed`
+
+### Style 3:
+
+* `skeleton of function developed (#94)`
+* `styler and lintr update (#94)`
+* `parameters and details sections completed (#94)`
+
+
+## Pull request
+
+We recommend a thorough read through of the articles, [Pull Request Review Guidance](https://pharmaverse.github.io/admiraldev/articles/pr_review_guidance.html) and the [Programming Strategy](https://pharmaverse.github.io/admiraldev/articles/programming_strategy.html) for in-depth discussions on doing a proper Pull Request. Pull Request authors will benefit from shorter review times by closely following the guidance provided in those two articles. Below we discuss some simple `git` commands in the terminal and on GitHub for doing a Pull Request. We recommend doing the Pull Request in GitHub only and not through the terminal.  
+
+Once all changes are committed, push the updated branch to GitHub:  
+`git push -u origin <branch_name>`  
+  
+In GitHub, under **Pull requests**, the user will either have a "Compare and pull request" button and/or a "Create Pull Request".  The first button will be created for you if GitHub detects recent changes you have made. The branch to merge with must be the `main` branch (base = `main`) and the compare branch is the new branch to merge - as shown in the below picture. Please **pay close attention** to the branch you are merging into!  
+
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_create_pr.png", dpi = 144)
+```
+
+The issue must be linked to the pull request in the "Development" field of the
+Pull Request. In most cases, this linkage will automatically close the issue and move to the Done column on our project board.
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_linked_issues_dark.png", dpi = 144)
+```
+
+Once you have completed the Pull Request you will see all committed changes are then available for the reviewer.  A reviewer must be specified in the Pull Request. It is recommended to write a brief summary to your reviewers so they can quickly come up to speed on your Pull Request.  Images of your updates are nice too, which are easy to do in GitHub!  Use any Screen Capture software and Copy and Paste into your summary. 
+
+### Reviewing/Closing an Issue
+
+- At least one reviewer must approve the Pull Request. Please review the [Pull
+Request Review Guidance](https://pharmaverse.github.io/admiraldev/articles/pr_review_guidance.html), which provides in depth
+guidance on doing a proper Pull Request.
+- The reviewer must ensure that the function follows the programming strategy
+recommendations.
+- Any comment/question/discussion must be addressed and documented in GitHub
+before the Pull Request is merged
+
+Once the review is completed, the reviewer will merge the Pull Request and the
+feature branch will automatically be deleted.
+
+After merging the Pull Request please check that the corresponding issue has been moved to the done column on the Project Board. Also, please make sure that the issue has closed.
+
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_done.png", dpi = 144)
+```
+
+### Solving Merge Conflicts in the Terminal on RStudio
+
+Merge conflict is a situation where `git` cannot decide which changes to apply since there were multiple updates in the same part of a file. This typically happens when multiple people update the same part of code. Those conflicts always need to be handled manually (as some further code updates may be required):
+
+```
+git checkout main
+git pull
+git checkout <feature_branch>  
+git merge main
+```
+  
+This provides a list of all files with conflicts In the file with conflicts the conflicting sections are marked with `<<<<<<<`, `=======`, and `>>>>>>>`. The code between these markers must be updated and the markers be removed. Source files need to be updated manually. Generated files like NAMESPACE or the generated documentation files should not be updated manually but recreated after the source files were updated. 
+  
+To make the changes available call:
+
+```
+git add <file with conflict> 
+git commit -m "<insert_message>"
+git push
+```
+
+### Solving Merge Conflicts in GitHub
+
+For simple merge conflicts, developers can make use of the GitHub interface to solve them. GitHub will show the number of conflicts between the two branches. In the below image, GitHub has found 3 conflicts, but we only display the first one.  Just like in the terminal, GitHub will make use of the `<<<<<<<`, `=======`, and `>>>>>>>` to highlight the conflicting sections.  You will need to make the decision on whether to keep the code from the base or the feature branch.  Once you have decided, go into the code and remove the section you no longer wish to keep.  Be sure to remove the `<<<<<<<`, `=======`, and `>>>>>>>` as well!  Once you work through the conflicts you will mark as **Resolved and Commit your changes**.  It is recommended to pull your branch back down to RStudio to make sure no untoward effects have happened to your branch. 
+
+```{r, echo = FALSE}
+knitr::include_graphics("github_conflicts.png", dpi = 144)
+```
+
+
+## Useful `git` Commands
+
+-	merging: `git merge <my_branch>` - merge my_branch into current branch  
+-	The stashing commands are useful when one wants to go back to clean directory 
+-	`git stash` - stash (store) current changes and restore a clean directory  
+-	`git stash pop` - put back (restore) stashed changes  
+- `git revert` is also helpful for undoing committed changes without rewriting history
+
+**Using code from unmerged branches**  
+
+-	Checkout the unmerged branch you want to use: `git checkout <unmerged_branch>`  
+-	Pull the latest committed changes from the unmerged branch: `git pull`  
+-	Check out your feature branch: `git checkout <my_branch>`  
+-	Merge the unmerged branch to <my_branch>: `git merge <unmerged_branch>`
+
+# Resources on using `git`, GitHub and RStudio {#github_resources}
+
+* [GitHub and RStudio](https://resources.github.com/whitepapers/github-and-rstudio/)
+* [Happy Git and GitHub for the useR](https://happygitwithr.com/)
+
+---
+
+# Common R CMD Check Issues
+
+**Source:** [https://pharmaverse.github.io/admiraldev/articles/rcmd_issues.html](https://pharmaverse.github.io/admiraldev/articles/rcmd_issues.html)
+
+---
+title: "R CMD Issues"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{R CMD Issues}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Common R CMD Check Issues
+
+`R CMD check` is a command line tool that checks R packages against a standard set of criteria. For a pull request to pass the check must not issue any notes, warnings or errors. Below is a list of common issues and how to resolve them.
+
+## Check Fails Only on One Version
+
+If the `R CMD check` workflow fails only on one or two R versions it can be helpful to reproduce the testing environment locally.
+
+To reproduce a particular R version environment open the `{admiral}` project in the corresponding R version, comment the line `source("renv/activate.R")` in the `.Rprofile` file, restart the R session and then run the following commands in the R console.
+
+``` r
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = "true")
+
+if (!dir.exists(".library")) {
+  dir.create(".library")
+}
+
+base_recommended_pkgs <- row.names(installed.packages(priority = "high"))
+for (pkg in base_recommended_pkgs) {
+  path <- file.path(.Library, pkg)
+  cmd <- sprintf("cp -r %s .library", path)
+  system(cmd)
+}
+assign(".lib.loc", ".library", envir = environment(.libPaths))
+
+r_version <- getRversion()
+if (grepl("^4.1", r_version)) {
+  options(repos = "https://packagemanager.posit.co/cran/2021-05-03/")
+} else if (grepl("^4.2", r_version)) {
+  options(repos = "https://packagemanager.posit.co/cran/2022-01-03/")
+} else if (grepl("^4.3", r_version)) {
+  options(repos = "https://packagemanager.posit.co/cran/2023-04-20/")
+} else {
+  options(repos = "https://cran.rstudio.com")
+}
+
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes")
+}
+remotes::install_deps(dependencies = TRUE)
+remotes::install_github("pharmaverse/pharmaversesdtm", ref = "devel")
+remotes::install_github("pharmaverse/admiraldev", ref = "devel")
+rcmdcheck::rcmdcheck()
+```
+
+This will ensure that the exact package versions we use in the workflow are installed into the hidden folder `.library`. That way your existing R packages are *not* overwritten.
+
+## Package Dependencies
+
+    > checking package dependencies ... ERROR
+      Namespace dependency not required: 'pkg'
+
+Add `pkg` to the `Imports` or `Suggests` field in the `DESCRIPTION` file. In general, dependencies should be listed in the `Imports` field. However, if a package is only used inside vignettes or unit tests it should be listed in `Suggests` because all `{admiral}` functions would work without these "soft" dependencies being installed.
+
+## Global Variables
+
+    ❯ checking R code for possible problems ... NOTE
+      function_xyz: no visible binding for global variable 'some_var'
+
+Add `some_var` to the list of "global" variables in `R/globals.R`.
+
+## Undocumented Function Parameter
+
+    ❯ checking Rd \usage sections ... WARNING
+      Undocumented arguments in documentation object 'function_xyz'
+        'some_param'
+
+Add an `@param some_param` section in the header of `function_xyz()` and run `devtools::document()` afterwards.
+
+## Outdated Documentation
+
+    ❯ checking for code/documentation mismatches ... WARNING
+      Codoc mismatches from documentation object 'function_xyz':
+      ...
+      Argument names in code not in docs:
+        new_param_name
+      Argument names in docs not in code:
+        old_param_name
+      Mismatches in argument names:
+        Position: 6 Code: new_param_name Docs: old_param_name
+
+The name of a parameter has been changed in the function code but not yet in the header. Change `@param old_param_name` to `@param new_param_name` and run `devtools::document()`.
+
+For further reading we recommend the [R-pkg manual r-cmd chapter](https://r-pkgs.org/R-CMD-check.html)
 
 ---
 
@@ -952,9 +1349,30 @@ These functions are implemented in `roxygen2.R` and the naming convention for ea
 
 For unit testing context see `tests/testthat/AGENTS.md` (generated from [https://pharmaverse.github.io/admiraldev/articles/unit_test_guidance.html](https://pharmaverse.github.io/admiraldev/articles/unit_test_guidance.html)).
 
+## Package Documentation
+
+After adding or modifying any roxygen2 comments (`#'`) in R source files,
+regenerate the documentation before committing:
+
+```r
+devtools::document()
+```
+
+This updates all `.Rd` files in `man/` and the `NAMESPACE` file. Always
+run it when you:
+
+- Add or rename a `@param`, `@return`, `@export`, or `@importFrom` tag
+- Add a new exported function
+- Change a function signature
+
+R CMD check will issue a WARNING for undocumented arguments or a mismatch
+between the code and docs if `devtools::document()` has not been run.
+
 ## Key References
 
 - [Programming Strategy](https://pharmaverse.github.io/admiraldev/articles/programming_strategy.html)
+- [Git and GitHub Usage](https://pharmaverse.github.io/admiraldev/articles/git_usage.html)
+- [Common R CMD Check Issues](https://pharmaverse.github.io/admiraldev/articles/rcmd_issues.html)
 - [Unit Test Guidance](https://pharmaverse.github.io/admiraldev/articles/unit_test_guidance.html)
 - [Admiral Website](https://pharmaverse.github.io/admiral/)
 - [admiraldev Website](https://pharmaverse.github.io/admiraldev/)
